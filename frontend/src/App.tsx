@@ -1,7 +1,7 @@
 import { connect, disconnect, request } from '@stacks/connect'
-import type { GetAddressesResult, TransactionResult } from '@stacks/connect/dist/types/methods'
+import type { GetAddressesResult, TransactionResult, ClarityValue } from '@stacks/connect/dist/types/methods'
 import { useState } from 'react'
-import { Cl, Pc } from '@stacks/transactions'
+import { Cl, Pc, fetchCallReadOnlyFunction } from '@stacks/transactions'
 
 export default function App() {
   let [isConnected, setIsConnected] = useState<boolean>(false)
@@ -46,6 +46,25 @@ export default function App() {
     let data = await response.json()
 
     return data.names[0].full_name
+  }
+
+  async function getMessageCountAtBlock() {
+    let response = await fetch('https://api.testnet.hiro.so/v2/info', {
+      headers: {
+        "x-api-key": "<HIRO_API_KEY>"
+      }
+    })
+    let data = await response.json()
+    let stacksBlockHeight = data.stacks_tip_height
+
+    let result: ClarityValue = await fetchCallReadOnlyFunction({
+      contractAddress: 'ST11V9ZN6E6VG72SHMAVM9GDE30VD3VGW5Q1W9WX3',
+      contractName: 'stacks-dev-quickstart-message-board',
+      functionName: 'get-message-count-at-block',
+      functionArgs: [Cl.uint(stacksBlockHeight)],
+      network: 'testnet',
+      senderAddress: 'ST11V9ZN6E6VG72SHMAVM9GDE30VD3VGW5Q1W9WX3',
+    })
   }
   
   return (
