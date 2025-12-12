@@ -1,6 +1,6 @@
 # Stacks Message Board (sBTC)
 
-A simple Clarity dApp that lets users post short messages to the Stacks blockchain for a 1-satoshi sBTC fee. The contract tracks messages (content, author, burn block height), allows the deployer to withdraw collected sBTC, and exposes read-only helpers. A small React + Stacks Connect frontend is included for testnet.
+A Clarity dApp that lets users post short messages to the Stacks blockchain for a 1-satoshi sBTC fee. The contract tracks messages (content, author, burn block height, Stacks block time), enforces sBTC payment with post-conditions, verifies the sBTC contract hash, and allows the deployer to withdraw collected sBTC. A small React + Stacks Connect frontend is included for testnet.
 
 ## Repo layout
 - `contracts/message-board.clar` — Clarity contract charging 1 sBTC to post and emitting an event for each message.
@@ -25,12 +25,19 @@ cd frontend && npm install
 
 ## Smart contract
 Key entrypoints in `message-board.clar`:
-- `add-message (content)` — Charges 1 satoshi of sBTC via post-condition; stores message with author and `burn-block-height`; emits an event; returns message id.
+- `add-message (content)` — Charges 1 satoshi of sBTC via post-condition; stores message with author, `burn-block-height`, and `stacks-block-time`; emits an event; returns message id.
 - `withdraw-funds` — Deployer-only withdrawal of accumulated sBTC to the contract owner.
 - `get-message` / `get-message-author` — Read a message or just its author by id.
 - `get-message-count-at-block (block)` — Historical message count at a given Stacks block using `at-block`.
+- `get-token-hash-status` — Read-only helper to compare the expected vs current sBTC contract hash.
 
 The contract depends on the sBTC token/registry/deposit requirement contracts (addresses provided in `deployments/default.testnet-plan.yaml`).
+
+## Clarity 4 features used
+- `restrict-assets?` protects external calls while charging 1 sat of sBTC.
+- `stacks-block-time` recorded alongside `burn-block-height` for richer timestamps.
+- `contract-hash?` to pin and verify the sBTC token contract code.
+- `to-ascii?` to emit human-readable principals in events.
 
 ## Tests
 ```bash
@@ -69,7 +76,4 @@ Frontend contract configuration lives inline in `src/App.tsx`; update the contra
 - `withdraw-funds` is restricted to the contract deployer (`CONTRACT_OWNER`).
 - When changing epochs or Clarity versions, align `Clarinet.toml` and deployment plans.
 
-## Suggested GitHub “About” text
-- Short: “Message board dApp on Stacks that charges 1 sat of sBTC per post, with tests and a React demo.”
-- Longer: “Clarity-powered message board for Stacks: pay 1 sat sBTC to post, withdrawable by the owner, with Clarinet tests, deployment plans, and a Vite/React testnet UI.”
 
