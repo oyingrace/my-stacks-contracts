@@ -1,29 +1,10 @@
-;; title: message-board
-;; version:
-;; summary:
-;; description:
+;; Simple Message Board Contract
+;; This contract allows users to read and post messages for a fee in sBTC.
 
-;; traits
-;;
+;; Define contract owner
+(define-constant CONTRACT_OWNER tx-sender)
 
-;; token definitions
-;;
-
-;; constants
-;;
-
-;; data vars
-;;
-
-;; data maps
-;;
-
-;; public functions
-;;
-
-;; read only functions
-;;
-
-;; private functions
-;;
-
+;; Define error codes
+(define-constant ERR_NOT_ENOUGH_SBTC (err u1004))
+(define-constant ERR_NOT_CONTRACT_OWNER (err u1005))
+(define-constant ERR_BLOCK_NOT_FOUND (err u1003))
