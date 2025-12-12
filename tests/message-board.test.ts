@@ -19,15 +19,19 @@ describe("example tests", () => {
     )
 
     const messageCount = simnet.getDataVar("message-board", "message-count");
+    const stackTime = confirmation.events[1].data.value["stack-time"];
     
     expect(confirmation.result).toHaveClarityType(ClarityType.ResponseOk);
     expect(confirmation.result).toBeOk(messageCount);    
+    expect(stackTime).toHaveClarityType(ClarityType.UInt);
     expect(confirmation.events[1].data.value).toBeTuple({
       author: Cl.standardPrincipal(address1),
+      "author-ascii": Cl.stringAscii(address1),
       event: Cl.stringAscii("[Stacks Dev Quickstart] New Message"),
       id: messageCount,
       message: Cl.stringUtf8(content),
       time: Cl.uint(currentBurnBlockHeight),
+      "stack-time": stackTime,
     });
   });
 
