@@ -57,3 +57,20 @@
     (ok id)
   )
 )
+
+;; Withdraw function for contract owner to withdraw accumulated sBTC
+(define-public (withdraw-funds)
+  (begin
+    (asserts! (is-eq tx-sender CONTRACT_OWNER) (err u1005))
+    (let ((balance (unwrap-panic (contract-call? 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token
+        get-balance current-contract
+      ))))
+      (if (> balance u0)
+        (contract-call? 'SM3VDXK3WZZSA84XXFKAFAF15NNZX32CTSG82JFQ4.sbtc-token
+          transfer balance current-contract CONTRACT_OWNER none
+        )
+        (ok false)
+      )
+    )
+  )
+)
